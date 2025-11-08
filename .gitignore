@@ -19,6 +19,7 @@ data/archives/
 .env
 .env.local
 .env.*.local
+config/notion-config.json
 
 # OS files
 .DS_Store
