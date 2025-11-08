@@ -1,0 +1,42 @@
+# Financial Command Center - Git Ignore
+# IMPORTANT: Never commit financial screenshots or extracted data
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sensitive financial data
+data/screenshots/
+data/extracted/
+data/archives/
+outputs/
+
+# Environment variables (API keys, etc.)
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*_processed.png
+
+# Logs
+logs/
+*.log
+
+# Test outputs
+test-output/

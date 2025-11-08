@@ -1,0 +1,30 @@
+{
+  "name": "financial-command-center",
+  "version": "1.0.0",
+  "description": "> Screenshot-based financial dashboard generator for solo practice owners",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "node src/web_server.js",
+    "dashboard": "node src/generate_dashboard.js",
+    "notion": "node src/sync_notion.js",
+    "quicken": "node src/process_quicken.js",
+    "quickbooks": "node src/process_quickbooks.js",
+    "bank": "node src/process_bank.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@notionhq/client": "^5.3.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
+    "pdf.js-extract": "^0.2.1",
+    "sharp": "^0.34.5",
+    "tesseract.js": "^6.0.1"
+  }
+}
