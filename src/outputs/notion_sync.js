@@ -38,6 +38,9 @@ class NotionAccountSync {
    * (Using curl because Node's DNS resolver has issues in this environment)
    */
   async notionRequest(method, endpoint, body = null) {
+    const tmpDir = path.join(process.cwd(), 'data', 'tmp');
+    let tempFile = null;
+
     try {
       const url = `https://api.notion.com${endpoint}`;
       const headers = [
@@ -50,8 +53,11 @@ class NotionAccountSync {
       if (method === 'GET') {
         curlCommand = `curl -s -X GET ${headers} "${url}"`;
       } else if (method === 'POST') {
-        const bodyJson = JSON.stringify(body).replace(/"/g, '\\"');
-        curlCommand = `curl -s -X POST ${headers} -d "${bodyJson}" "${url}"`;
+        // Write body to temp file to avoid shell escaping issues
+        await fs.mkdir(tmpDir, { recursive: true });
+        tempFile = path.join(tmpDir, `notion-req-${Date.now()}.json`);
+        await fs.writeFile(tempFile, JSON.stringify(body));
+        curlCommand = `curl -s -X POST ${headers} -d @"${tempFile}" "${url}"`;
       } else {
         throw new Error(`Unsupported HTTP method: ${method}`);
       }
@@ -70,6 +76,15 @@ class NotionAccountSync {
         throw error;
       }
       throw new Error(`Notion request failed: ${error.message}`);
+    } finally {
+      // Clean up temp file
+      if (tempFile) {
+        try {
+          await fs.unlink(tempFile);
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      }
     }
   }
 

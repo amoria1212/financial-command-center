@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Command Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .drop-zone {
+            border: 3px dashed #667eea;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone:hover {
+            border-color: #764ba2;
+            background: #f0f1f5;
+        }
+
+        .drop-zone.dragover {
+            border-color: #764ba2;
+            background: #e8e9f3;
+            transform: scale(1.02);
+        }
+
+        .drop-zone p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .date-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-notion {
+            background: #000;
+            margin-top: 10px;
+        }
+
+        .btn-notion:hover {
+            background: #333;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+
+        .status.loading {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            display: block;
+        }
+
+        .file-name {
+            font-size: 0.9em;
+            color: #667eea;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .results {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .account-list {
+            list-style: none;
+        }
+
+        .account-list li {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .account-list li:last-child {
+            border-bottom: none;
+        }
+
+        .account-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .account-balance {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .account-balance.negative {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 Financial Command Center</h1>
+            <p>Upload screenshots and sync to Notion</p>
+        </header>
+
+        <div class="cards">
+            <!-- Quicken Card -->
+            <div class="card">
+                <h2>📸 Quicken Simplifi</h2>
+
+                <div class="drop-zone" id="quicken-drop">
+                    <p>📁 Drag screenshot here</p>
+                    <p style="font-size: 0.9em;">or click to browse</p>
+                </div>
+                <input type="file" id="quicken-file" class="file-input" accept="image/*">
+                <div class="file-name" id="quicken-filename"></div>
+
+                <input type="date" id="quicken-date" class="date-input" value="">
+
+                <button class="btn" id="quicken-btn" disabled>Process Quicken Data</button>
+
+                <div class="status" id="quicken-status"></div>
+            </div>
+
+            <!-- QuickBooks Card -->
+            <div class="card">
+                <h2>📄 QuickBooks P&L</h2>
+
+                <div class="drop-zone" id="quickbooks-drop">
+                    <p>📁 Drag PDF here</p>
+                    <p style="font-size: 0.9em;">or click to browse</p>
+                </div>
+                <input type="file" id="quickbooks-file" class="file-input" accept=".pdf">
+                <div class="file-name" id="quickbooks-filename"></div>
+
+                <input type="date" id="quickbooks-start" class="date-input" placeholder="Start Date">
+                <input type="date" id="quickbooks-end" class="date-input" placeholder="End Date">
+
+                <button class="btn" id="quickbooks-btn" disabled>Process QuickBooks Data</button>
+
+                <div class="status" id="quickbooks-status"></div>
+            </div>
+        </div>
+
+        <!-- Notion Sync Card -->
+        <div class="card">
+            <h2>🔄 Sync to Notion</h2>
+            <p style="margin-bottom: 20px; color: #666;">
+                Sync your processed account data to Notion Account Tracker
+            </p>
+            <button class="btn btn-notion" id="notion-btn">Sync to Notion</button>
+            <div class="status" id="notion-status"></div>
+        </div>
+
+        <!-- Results Display -->
+        <div class="results" id="results">
+            <h2>📊 Account Summary</h2>
+            <ul class="account-list" id="account-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Set today's date as default
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('quicken-date').value = today;
+        document.getElementById('quickbooks-start').value = today;
+        document.getElementById('quickbooks-end').value = today;
+
+        // Quicken file handling
+        let quickenFile = null;
+        const quickenDrop = document.getElementById('quicken-drop');
+        const quickenInput = document.getElementById('quicken-file');
+        const quickenBtn = document.getElementById('quicken-btn');
+        const quickenFilename = document.getElementById('quicken-filename');
+        const quickenStatus = document.getElementById('quicken-status');
+
+        quickenDrop.addEventListener('click', () => quickenInput.click());
+        quickenDrop.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            quickenDrop.classList.add('dragover');
+        });
+        quickenDrop.addEventListener('dragleave', () => {
+            quickenDrop.classList.remove('dragover');
+        });
+        quickenDrop.addEventListener('drop', (e) => {
+            e.preventDefault();
+            quickenDrop.classList.remove('dragover');
+            quickenFile = e.dataTransfer.files[0];
+            quickenFilename.textContent = `📎 ${quickenFile.name}`;
+            quickenBtn.disabled = false;
+        });
+        quickenInput.addEventListener('change', (e) => {
+            quickenFile = e.target.files[0];
+            quickenFilename.textContent = `📎 ${quickenFile.name}`;
+            quickenBtn.disabled = false;
+        });
+
+        quickenBtn.addEventListener('click', async () => {
+            const date = document.getElementById('quicken-date').value;
+            quickenStatus.className = 'status loading';
+            quickenStatus.textContent = '⏳ Processing Quicken screenshot...';
+            quickenBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', quickenFile);
+            formData.append('date', date);
+
+            try {
+                const response = await fetch('/api/process-quicken', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    quickenStatus.className = 'status success';
+                    quickenStatus.textContent = `✅ ${result.message}`;
+                    displayAccounts(result.data.accounts);
+                } else {
+                    quickenStatus.className = 'status error';
+                    quickenStatus.textContent = `❌ Error: ${result.error}`;
+                }
+            } catch (error) {
+                quickenStatus.className = 'status error';
+                quickenStatus.textContent = `❌ Error: ${error.message}`;
+            }
+
+            quickenBtn.disabled = false;
+        });
+
+        // QuickBooks file handling
+        let quickbooksFile = null;
+        const quickbooksDrop = document.getElementById('quickbooks-drop');
+        const quickbooksInput = document.getElementById('quickbooks-file');
+        const quickbooksBtn = document.getElementById('quickbooks-btn');
+        const quickbooksFilename = document.getElementById('quickbooks-filename');
+        const quickbooksStatus = document.getElementById('quickbooks-status');
+
+        quickbooksDrop.addEventListener('click', () => quickbooksInput.click());
+        quickbooksDrop.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            quickbooksDrop.classList.add('dragover');
+        });
+        quickbooksDrop.addEventListener('dragleave', () => {
+            quickbooksDrop.classList.remove('dragover');
+        });
+        quickbooksDrop.addEventListener('drop', (e) => {
+            e.preventDefault();
+            quickbooksDrop.classList.remove('dragover');
+            quickbooksFile = e.dataTransfer.files[0];
+            quickbooksFilename.textContent = `📎 ${quickbooksFile.name}`;
+            quickbooksBtn.disabled = false;
+        });
+        quickbooksInput.addEventListener('change', (e) => {
+            quickbooksFile = e.target.files[0];
+            quickbooksFilename.textContent = `📎 ${quickbooksFile.name}`;
+            quickbooksBtn.disabled = false;
+        });
+
+        quickbooksBtn.addEventListener('click', async () => {
+            const startDate = document.getElementById('quickbooks-start').value;
+            const endDate = document.getElementById('quickbooks-end').value;
+            quickbooksStatus.className = 'status loading';
+            quickbooksStatus.textContent = '⏳ Processing QuickBooks PDF...';
+            quickbooksBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', quickbooksFile);
+            formData.append('startDate', startDate);
+            formData.append('endDate', endDate);
+
+            try {
+                const response = await fetch('/api/process-quickbooks', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    quickbooksStatus.className = 'status success';
+                    quickbooksStatus.textContent = `✅ ${result.message}`;
+                } else {
+                    quickbooksStatus.className = 'status error';
+                    quickbooksStatus.textContent = `❌ Error: ${result.error}`;
+                }
+            } catch (error) {
+                quickbooksStatus.className = 'status error';
+                quickbooksStatus.textContent = `❌ Error: ${error.message}`;
+            }
+
+            quickbooksBtn.disabled = false;
+        });
+
+        // Notion sync
+        const notionBtn = document.getElementById('notion-btn');
+        const notionStatus = document.getElementById('notion-status');
+
+        notionBtn.addEventListener('click', async () => {
+            notionStatus.className = 'status loading';
+            notionStatus.textContent = '⏳ Syncing to Notion...';
+            notionBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/sync-notion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date: today })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    notionStatus.className = 'status success';
+                    notionStatus.textContent = `✅ ${result.message}`;
+                } else {
+                    notionStatus.className = 'status error';
+                    notionStatus.textContent = `❌ Error: ${result.error}`;
+                }
+            } catch (error) {
+                notionStatus.className = 'status error';
+                notionStatus.textContent = `❌ Error: ${error.message}`;
+            }
+
+            notionBtn.disabled = false;
+        });
+
+        // Display accounts
+        function displayAccounts(accounts) {
+            const accountList = document.getElementById('account-list');
+            const results = document.getElementById('results');
+
+            accountList.innerHTML = '';
+
+            accounts.forEach(account => {
+                const li = document.createElement('li');
+                const name = document.createElement('span');
+                const balance = document.createElement('span');
+
+                name.className = 'account-name';
+                name.textContent = account.name;
+
+                balance.className = 'account-balance';
+                if (account.balance < 0) {
+                    balance.classList.add('negative');
+                }
+                balance.textContent = `$${account.balance.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+
+                li.appendChild(name);
+                li.appendChild(balance);
+                accountList.appendChild(li);
+            });
+
+            results.classList.add('show');
+        }
+    </script>
+</body>
+</html>
