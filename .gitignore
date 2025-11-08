@@ -9,9 +9,11 @@ yarn-error.log*
 
 # Sensitive financial data
 data/screenshots/
-data/extracted/
+data/extracted/*
+!data/extracted/example_quicken.json
 data/archives/
-outputs/
+/outputs/*
+!/outputs/MESSAGE_TO_CIPHER.md
 
 # Environment variables (API keys, etc.)
 .env

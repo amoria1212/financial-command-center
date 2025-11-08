@@ -1,0 +1,64 @@
+{
+  "source": "quicken",
+  "extractedDate": "2025-11-08T12:00:00.000Z",
+  "netWorth": 527130.64,
+  "totalAssets": 5843.15,
+  "totalDebt": -32360.66,
+  "accounts": [
+    {
+      "name": "Alaska Visa",
+      "balance": -23423.35,
+      "type": "credit_card"
+    },
+    {
+      "name": "AMEX",
+      "balance": -2082.35,
+      "type": "credit_card"
+    },
+    {
+      "name": "Umpqua Credit Card",
+      "balance": -2891.38,
+      "type": "credit_card"
+    },
+    {
+      "name": "Business Spark Cash",
+      "balance": -2082.35,
+      "type": "credit_card"
+    },
+    {
+      "name": "Southwest CREDIT CARD",
+      "balance": -1576.51,
+      "type": "credit_card"
+    },
+    {
+      "name": "Amazon",
+      "balance": -227.46,
+      "type": "credit_card"
+    },
+    {
+      "name": "HELOC",
+      "balance": -74.94,
+      "type": "credit_line"
+    },
+    {
+      "name": "VERE",
+      "balance": -2.32,
+      "type": "credit_card"
+    },
+    {
+      "name": "360 Checking",
+      "balance": 5639.43,
+      "type": "checking"
+    },
+    {
+      "name": "Embark Checking",
+      "balance": 203.72,
+      "type": "checking"
+    },
+    {
+      "name": "Discover",
+      "balance": 0.00,
+      "type": "credit_card"
+    }
+  ]
+}

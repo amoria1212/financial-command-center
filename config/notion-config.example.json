@@ -1,0 +1,9 @@
+{
+  "apiKey": "secret_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "accountTrackerDatabaseId": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "_comments": {
+    "apiKey": "Your Notion integration token - get from https://www.notion.so/my-integrations",
+    "accountTrackerDatabaseId": "The database ID for your Account Tracker database",
+    "setup": "1. Copy this file to notion-config.json, 2. Fill in your actual values, 3. Make sure notion-config.json is in .gitignore"
+  }
+}
