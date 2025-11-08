@@ -19,16 +19,58 @@
  * - Change from Last Month (number property)
  */
 
-const { Client } = require('@notionhq/client');
+const https = require('https');
+const { execSync } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
 
 class NotionAccountSync {
   constructor() {
-    // Initialize Notion client
-    this.notion = null;
+    // Initialize Notion credentials
+    this.apiKey = null;
     this.databaseId = null;
     this.configPath = path.join(process.cwd(), 'config', 'notion-config.json');
+    this.notionVersion = '2022-06-28';
+  }
+
+  /**
+   * Make a raw HTTP request to Notion API using curl
+   * (Using curl because Node's DNS resolver has issues in this environment)
+   */
+  async notionRequest(method, endpoint, body = null) {
+    try {
+      const url = `https://api.notion.com${endpoint}`;
+      const headers = [
+        `-H "Authorization: Bearer ${this.apiKey}"`,
+        `-H "Notion-Version: ${this.notionVersion}"`,
+        `-H "Content-Type: application/json"`
+      ].join(' ');
+
+      let curlCommand;
+      if (method === 'GET') {
+        curlCommand = `curl -s -X GET ${headers} "${url}"`;
+      } else if (method === 'POST') {
+        const bodyJson = JSON.stringify(body).replace(/"/g, '\\"');
+        curlCommand = `curl -s -X POST ${headers} -d "${bodyJson}" "${url}"`;
+      } else {
+        throw new Error(`Unsupported HTTP method: ${method}`);
+      }
+
+      const output = execSync(curlCommand, { encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 });
+      const parsed = JSON.parse(output);
+
+      // Check for Notion API errors
+      if (parsed.object === 'error') {
+        throw new Error(`Notion API error: ${parsed.message || JSON.stringify(parsed)}`);
+      }
+
+      return parsed;
+    } catch (error) {
+      if (error.message.includes('Notion API error')) {
+        throw error;
+      }
+      throw new Error(`Notion request failed: ${error.message}`);
+    }
   }
 
   /**
@@ -37,7 +79,7 @@ class NotionAccountSync {
   async loadConfig() {
     // Try environment variables first
     if (process.env.NOTION_API_KEY && process.env.NOTION_ACCOUNT_TRACKER_DB_ID) {
-      this.notion = new Client({ auth: process.env.NOTION_API_KEY });
+      this.apiKey = process.env.NOTION_API_KEY;
       this.databaseId = process.env.NOTION_ACCOUNT_TRACKER_DB_ID;
       console.log('✅ Loaded Notion config from environment variables');
       return;
@@ -52,7 +94,7 @@ class NotionAccountSync {
         throw new Error('Missing apiKey or accountTrackerDatabaseId in config file');
       }
 
-      this.notion = new Client({ auth: config.apiKey });
+      this.apiKey = config.apiKey;
       this.databaseId = config.accountTrackerDatabaseId;
       console.log('✅ Loaded Notion config from config file');
     } catch (error) {
@@ -150,7 +192,7 @@ class NotionAccountSync {
     const change = previousBalance !== null ? balance - previousBalance : null;
 
     try {
-      await this.notion.pages.create({
+      const body = {
         parent: {
           database_id: this.databaseId
         },
@@ -186,7 +228,9 @@ class NotionAccountSync {
             number: change
           }
         }
-      });
+      };
+
+      await this.notionRequest('POST', '/v1/pages', body);
 
       const changeStr = change !== null
         ? (change > 0 ? `+$${change.toFixed(2)}` : `-$${Math.abs(change).toFixed(2)}`)
@@ -227,9 +271,7 @@ class NotionAccountSync {
    */
   async testConnection() {
     try {
-      const database = await this.notion.databases.retrieve({
-        database_id: this.databaseId
-      });
+      const database = await this.notionRequest('GET', `/v1/databases/${this.databaseId}`);
 
       console.log('\n✅ Notion connection successful!');
       console.log(`📊 Database: ${database.title[0]?.plain_text || 'Untitled'}`);
