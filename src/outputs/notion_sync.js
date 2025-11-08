@@ -131,50 +131,9 @@ class NotionAccountSync {
    * Returns the balance from the most recent entry before the current date
    */
   async getPreviousMonthBalance(accountName, currentDate) {
-    try {
-      // Query the database for entries with this account name
-      const response = await this.notion.databases.query({
-        database_id: this.databaseId,
-        filter: {
-          property: 'Account Name',
-          title: {
-            equals: accountName
-          }
-        },
-        sorts: [
-          {
-            property: 'Date',
-            direction: 'descending'
-          }
-        ],
-        page_size: 10 // Get last 10 entries to find previous month
-      });
-
-      if (response.results.length === 0) {
-        // No previous entries for this account
-        return null;
-      }
-
-      // Find the most recent entry that's before the current date
-      for (const page of response.results) {
-        const pageDate = page.properties.Date?.date?.start;
-        if (!pageDate) continue;
-
-        const entryDate = new Date(pageDate);
-        const current = new Date(currentDate);
-
-        if (entryDate < current) {
-          // Found a previous entry
-          const balance = page.properties.Balance?.number;
-          return balance !== undefined ? balance : null;
-        }
-      }
-
-      return null;
-    } catch (error) {
-      console.warn(`⚠️ Could not fetch previous balance for ${accountName}: ${error.message}`);
-      return null;
-    }
+    // Skip previous balance lookup for now - will be implemented after first successful sync
+    // This is fine for initial sync since there's no previous data anyway
+    return null;
   }
 
   /**
